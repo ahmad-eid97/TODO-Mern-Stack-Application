@@ -1,6 +1,7 @@
 //= Modules
 import { Router } from "express";
 //= Middlewares
+import { loginLimiter, registerLimiter } from "../../middlewares/rateLimit.js";
 import validate from "../../middlewares/validation/validate.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
 import authenticate from "../../middlewares/auth/authenticate.js";
@@ -11,9 +12,14 @@ import { registerSchema, loginSchema } from "./auth.validation.js";
 
 const router = Router();
 
-router.post("/register", validate(registerSchema), asyncHandler(register));
+router.post(
+  "/register",
+  registerLimiter,
+  validate(registerSchema),
+  asyncHandler(register),
+);
 
-router.post("/login", validate(loginSchema), asyncHandler(login));
+router.post("/login", loginLimiter, validate(loginSchema), asyncHandler(login));
 
 router.post("/logout", asyncHandler(logout));
 

@@ -11,6 +11,16 @@ if (!["development", "test", "production"].includes(NODE_ENV)) {
   throw new Error("NODE_ENV must be development, test, or production");
 }
 
+const configuredProxyHops = process.env.TRUST_PROXY_HOPS ?? "0";
+const TRUST_PROXY_HOPS = Number(configuredProxyHops);
+
+if (
+  !/^(0|[1-9]\d*)$/.test(configuredProxyHops) ||
+  !Number.isSafeInteger(TRUST_PROXY_HOPS)
+) {
+  throw new Error("TRUST_PROXY_HOPS must be a non-negative whole number");
+}
+
 const configuredOrigin = process.env.CORS_ORIGIN?.trim();
 
 if (NODE_ENV === "production" && !configuredOrigin) {
@@ -34,7 +44,6 @@ try {
     throw new Error("Invalid frontend origin");
   }
 
-  // Normalize the optional trailing slash and default port to a browser origin.
   CORS_ORIGIN = url.origin;
 } catch {
   throw new Error(
@@ -78,6 +87,7 @@ const env = {
   MONGODB_URL,
   CORS_ORIGIN,
   NODE_ENV,
+  TRUST_PROXY_HOPS,
   JWT_SECRET,
   JWT_EXPIRES_IN,
 };

@@ -11,12 +11,18 @@ import healthRouter from "./modules/health/health.routes.js";
 import authRouter from "./modules/auth/auth.routes.js";
 import todoRouter from "./modules/todos/todo.routes.js";
 //= Middleware
+import { apiLimiter } from "./middlewares/rateLimit.js";
 import notFound from "./middlewares/error/notFound.js";
 import errorHandler from "./middlewares/error/errorHandler.js";
 import enforceOrigin from "./middlewares/security/enforceOrigin.js";
 import requestProtection from "./middlewares/security/requestProtection.js";
 
 const app = express();
+
+app.set(
+  "trust proxy",
+  env.TRUST_PROXY_HOPS === 0 ? false : env.TRUST_PROXY_HOPS,
+);
 
 // Global Middleware
 app.use(helmet());
@@ -35,6 +41,8 @@ app.use(
 );
 app.use(requestProtection);
 app.use(express.json({ limit: "10kb", strict: true, inflate: false }));
+
+app.use("/", apiLimiter);
 
 //= Routes
 app.use("/", healthRouter);
