@@ -1,8 +1,12 @@
 //= Services
 import authService from "./auth.service.js";
+import { toPublicUser } from "./auth.response.js";
 //= Utils
 import { generateAccessToken } from "../../utils/jwt.js";
-import { accessTokenCookieOptions } from "./auth.cookie.js";
+import {
+  accessTokenCookieOptions,
+  getAccessTokenCookieOptions,
+} from "./auth.cookie.js";
 //= Types
 import type { Request, Response, NextFunction } from "express";
 import { ACCESS_TOKEN_COOKIE } from "./auth.constants.js";
@@ -18,10 +22,14 @@ export const register = async (
     userId: userData._id.toString(),
   });
 
-  res.cookie(ACCESS_TOKEN_COOKIE, userAccessToken, accessTokenCookieOptions);
+  res.cookie(
+    ACCESS_TOKEN_COOKIE,
+    userAccessToken,
+    getAccessTokenCookieOptions(userAccessToken),
+  );
 
   res.status(201).json({
-    data: userData,
+    data: toPublicUser(userData),
   });
 };
 
@@ -38,10 +46,24 @@ export const login = async (
     userId: userData._id.toString(),
   });
 
-  res.cookie(ACCESS_TOKEN_COOKIE, userAccessToken, accessTokenCookieOptions);
+  res.cookie(
+    ACCESS_TOKEN_COOKIE,
+    userAccessToken,
+    getAccessTokenCookieOptions(userAccessToken),
+  );
 
   res.status(200).json({
-    data: userData,
+    data: toPublicUser(userData),
+  });
+};
+
+export const getCurrentUser = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) => {
+  res.status(200).json({
+    data: toPublicUser(req.user!),
   });
 };
 

@@ -3,8 +3,9 @@ import { Router } from "express";
 //= Middlewares
 import validate from "../../middlewares/validation/validate.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
+import authenticate from "../../middlewares/auth/authenticate.js";
 //= Controllers
-import { register, login, logout } from "./auth.controller.js";
+import { register, login, logout, getCurrentUser } from "./auth.controller.js";
 //= Validation
 import { registerSchema, loginSchema } from "./auth.validation.js";
 
@@ -15,5 +16,7 @@ router.post("/register", validate(registerSchema), asyncHandler(register));
 router.post("/login", validate(loginSchema), asyncHandler(login));
 
 router.post("/logout", asyncHandler(logout));
+
+router.get("/me", authenticate, asyncHandler(getCurrentUser));
 
 export default router;

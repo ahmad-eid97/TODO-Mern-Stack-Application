@@ -9,7 +9,8 @@ const validate = (schema: ZodType, part: RequestPart = "body") => {
   return (req: Request, _res: Response, next: NextFunction) => {
     const result = schema.safeParse(req[part]);
     if (!result.success) {
-      const details = result.error.issues.map((error) => ({
+      // Keep invalid arrays from producing excessively large error responses.
+      const details = result.error.issues.slice(0, 20).map((error) => ({
         field: error.path.join("."),
         message: error.message,
       }));
@@ -18,8 +19,11 @@ const validate = (schema: ZodType, part: RequestPart = "body") => {
         new AppError("Validation Error", 400, "VALIDATION_ERROR", details),
       );
     }
-
-    req[part] = result.data;
+    if (part === "query") {
+      req.validatedQuery = result.data;
+    } else {
+      req[part] = result.data;
+    }
 
     next();
   };

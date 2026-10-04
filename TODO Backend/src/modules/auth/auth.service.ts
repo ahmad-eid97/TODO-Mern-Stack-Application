@@ -34,7 +34,7 @@ const registerUser = async (userData: RegisterInput) => {
   return user;
 };
 
-export const loginUser = async ({
+const loginUser = async ({
   email,
   password,
 }: {
