@@ -15,6 +15,7 @@ export enum Status {
 }
 
 export interface Subtask {
+  _id: Types.ObjectId;
   title: string;
   completed: boolean;
 }
@@ -27,7 +28,7 @@ export interface Todo {
   status: Status;
   category: string | undefined;
   dueDate: Date | undefined;
-  completedAt: Date;
+  completedAt: Date | undefined;
   tags: string[] | undefined;
   subtasks: Subtask[] | undefined;
   createdAt: Date;

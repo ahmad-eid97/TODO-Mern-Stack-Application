@@ -7,6 +7,7 @@ import DashboardPage from "../pages/DashboardPage";
 import TodosPage from "../pages/TodosPage";
 import ProfilePage from "../pages/ProfilePage";
 import Spinner from "../components/ui/Spinner";
+import { TodoProvider } from "../components/todos/TodoContext";
 
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 const RegisterPage = lazy(() => import("../pages/RegisterPage"));
@@ -14,31 +15,33 @@ const RegisterPage = lazy(() => import("../pages/RegisterPage"));
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <Suspense
-        fallback={
-          <div className="min-h-screen flex items-center justify-center bg-slate-950">
-            <Spinner size="lg" />
-          </div>
-        }
-      >
-        <Routes>
-          <Route element={<GuestRoute />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Route>
-
-          <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/todos" element={<TodosPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+      <TodoProvider>
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-950">
+              <Spinner size="lg" />
+            </div>
+          }
+        >
+          <Routes>
+            <Route element={<GuestRoute />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
             </Route>
-          </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/todos" element={<TodosPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+              </Route>
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </TodoProvider>
     </BrowserRouter>
   );
 }

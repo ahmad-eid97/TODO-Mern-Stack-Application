@@ -18,15 +18,17 @@ export const timeAgo = (dateStr: string): string =>
 
 export const formatDueDate = (
   dateStr: string,
+  completed = false,
 ): { label: string; isOverdue: boolean; isUrgent: boolean } => {
   const date = new Date(dateStr);
-  const overdue = isPast(date) && !isToday(date);
-  const urgent = isToday(date) || isTomorrow(date);
+  const overdue = !completed && isPast(date);
+  const urgent = !completed && (isToday(date) || isTomorrow(date));
 
   let label: string;
-  if (isToday(date)) label = "Today";
+  if (overdue)
+    label = `Overdue · ${isToday(date) ? "Today" : formatDate(dateStr)}`;
+  else if (isToday(date)) label = "Today";
   else if (isTomorrow(date)) label = "Tomorrow";
-  else if (overdue) label = `Overdue · ${formatDate(dateStr)}`;
   else if (isThisWeek(date))
     label = format(date, "EEEE"); // e.g. "Wednesday"
   else label = formatDate(dateStr);

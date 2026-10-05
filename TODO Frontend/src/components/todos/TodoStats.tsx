@@ -8,6 +8,7 @@ import {
 import clsx from "clsx";
 import { useTodos } from "./TodoContext";
 import type { FilterStatus } from "../../types/todo.types";
+import { useNavigate } from "react-router-dom";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -62,11 +63,13 @@ function StatCard({
 
 export default function TodoStats() {
   const { stats, filters, setStatus } = useTodos();
+  const navigate = useNavigate();
 
   if (!stats) return null;
 
   const clickFilter = (status: FilterStatus) => {
     setStatus(filters.status === status ? "all" : status);
+    navigate("/todos");
   };
 
   const cards = [

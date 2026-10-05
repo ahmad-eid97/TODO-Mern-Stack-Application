@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useId } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,7 +13,11 @@ import { toDateInputValue, todayInputValue } from "../../utils/dateUtils";
 import { getErrorMessage } from "../../utils/errorUtils";
 
 const schema = z.object({
-  title: z.string().min(1, "Title is required").max(120, "Max 120 characters"),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required")
+    .max(120, "Max 120 characters"),
   description: z.string().max(500, "Max 500 characters").optional(),
   priority: z.enum(["low", "medium", "high", "urgent"]),
   status: z.enum(["pending", "in_progress", "completed"]).optional(),
@@ -27,6 +31,13 @@ interface TodoFormProps {
   isOpen: boolean;
   onClose: () => void;
   todo?: Todo;
+}
+
+interface DraftSubtask {
+  key: string;
+  id?: string;
+  title: string;
+  completed: boolean;
 }
 
 const PRIORITY_OPTIONS = [
@@ -47,10 +58,12 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
   const isEditing = !!todo;
 
   const [tags, setTags] = useState<string[]>([]);
-  const [subtasks, setSubtasks] = useState<string[]>([]);
+  const [subtasks, setSubtasks] = useState<DraftSubtask[]>([]);
   const [subtaskInput, setSubtaskInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const submissionPending = useRef(false);
+  const formId = useId();
 
   const {
     register,
@@ -78,7 +91,9 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
       });
       queueMicrotask(() => {
         setTags(todo.tags ?? []);
-        setSubtasks(todo.subtasks.map((s) => s.title));
+        setSubtasks(
+          todo.subtasks.map((subtask) => ({ ...subtask, key: subtask.id })),
+        );
       });
     } else if (!isOpen) {
       reset({ priority: "medium", status: "pending" });
@@ -93,24 +108,34 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
 
   const addSubtask = () => {
     const t = subtaskInput.trim();
-    if (t && !subtasks.includes(t)) {
-      setSubtasks((prev) => [...prev, t]);
+    if (
+      t &&
+      t.length <= 120 &&
+      subtasks.length < 50 &&
+      !subtasks.some((task) => task.title === t)
+    ) {
+      setSubtasks((prev) => [
+        ...prev,
+        { key: crypto.randomUUID(), title: t, completed: false },
+      ]);
       setSubtaskInput("");
     }
   };
 
-  const removeSubtask = (idx: number) =>
-    setSubtasks((prev) => prev.filter((_, i) => i !== idx));
+  const removeSubtask = (key: string) =>
+    setSubtasks((prev) => prev.filter((task) => task.key !== key));
 
   const onSubmit = async (values: FormValues) => {
+    if (submissionPending.current) return;
+    submissionPending.current = true;
     setError("");
     setSubmitting(true);
     try {
       const payload = {
         title: values.title,
-        description: values.description || undefined,
+        description: values.description ?? "",
         priority: values.priority,
-        category: values.category || undefined,
+        category: values.category ?? "",
         dueDate: values.dueDate || undefined,
         tags,
       };
@@ -119,23 +144,28 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
         await updateTodo(todo.id, {
           ...payload,
           status: values.status,
-          subtasks: subtasks.map((title, i) => ({
-            id: todo.subtasks[i]?.id ?? crypto.randomUUID(),
-            title,
-            completed: todo.subtasks[i]?.completed ?? false,
-            createdAt: todo.subtasks[i]?.createdAt ?? new Date().toISOString(),
+          dueDate: values.dueDate
+            ? values.dueDate === toDateInputValue(todo.dueDate)
+              ? todo.dueDate
+              : values.dueDate
+            : null,
+          subtasks: subtasks.map((task) => ({
+            ...(task.id && { id: task.id }),
+            title: task.title,
+            completed: task.completed,
           })),
         });
       } else {
         await createTodo({
           ...payload,
-          subtasks: subtasks.map((title) => ({ title })),
+          subtasks: subtasks.map((task) => ({ title: task.title })),
         });
       }
       onClose();
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
+      submissionPending.current = false;
       setSubmitting(false);
     }
   };
@@ -143,7 +173,9 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        if (!submitting) onClose();
+      }}
       title={isEditing ? "Edit Todo" : "New Todo"}
       size="lg"
       footer={
@@ -153,7 +185,8 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
           </Button>
           <Button
             variant="primary"
-            onClick={handleSubmit(onSubmit)}
+            type="submit"
+            form={formId}
             isLoading={submitting}
           >
             {isEditing ? "Save Changes" : "Create Todo"}
@@ -161,7 +194,13 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
         </div>
       }
     >
-      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        id={formId}
+        className="space-y-4"
+        onSubmit={(event) => {
+          void handleSubmit(onSubmit)(event);
+        }}
+      >
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-400">
             {error}
@@ -235,7 +274,7 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
           <Input
             label="Due Date"
             type="date"
-            min={todayInputValue()}
+            min={isEditing ? undefined : todayInputValue()}
             error={errors.dueDate?.message}
             {...register("dueDate")}
           />
@@ -245,21 +284,25 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
           label="Tags"
           tags={tags}
           onChange={setTags}
+          maxTags={20}
           placeholder="Add tags..."
         />
 
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-slate-300">Subtasks</label>
           <div className="space-y-2">
-            {subtasks.map((task, i) => (
+            {subtasks.map((task) => (
               <div
-                key={i}
+                key={task.key}
                 className="flex items-center gap-2 bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2"
               >
-                <span className="flex-1 text-sm text-slate-300">{task}</span>
+                <span className="flex-1 text-sm text-slate-300">
+                  {task.title}
+                </span>
                 <button
                   type="button"
-                  onClick={() => removeSubtask(i)}
+                  onClick={() => removeSubtask(task.key)}
+                  aria-label={`Remove subtask ${task.title}`}
                   className="text-slate-500 hover:text-red-400 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -270,6 +313,8 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
               <input
                 type="text"
                 value={subtaskInput}
+                maxLength={120}
+                disabled={submitting || subtasks.length >= 50}
                 onChange={(e) => setSubtaskInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -285,6 +330,9 @@ export default function TodoForm({ isOpen, onClose, todo }: TodoFormProps) {
                 variant="secondary"
                 size="sm"
                 onClick={addSubtask}
+                disabled={
+                  submitting || subtasks.length >= 50 || !subtaskInput.trim()
+                }
                 leftIcon={<Plus className="w-4 h-4" />}
               >
                 Add

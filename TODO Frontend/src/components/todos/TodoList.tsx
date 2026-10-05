@@ -7,7 +7,17 @@ import { useState } from "react";
 import TodoForm from "./TodoForm";
 
 export default function TodoList() {
-  const { filteredTodos, isLoading, filters } = useTodos();
+  const {
+    filteredTodos,
+    isLoading,
+    isFetching,
+    filters,
+    error,
+    refreshTodos,
+    pagination,
+    page,
+    setPage,
+  } = useTodos();
   const [showForm, setShowForm] = useState(false);
 
   if (isLoading) {
@@ -20,12 +30,30 @@ export default function TodoList() {
     );
   }
 
+  if (error) {
+    return (
+      <div
+        role="alert"
+        className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 space-y-3"
+      >
+        <p className="text-sm text-red-300">{error}</p>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => void refreshTodos()}
+        >
+          Try again
+        </Button>
+      </div>
+    );
+  }
+
   if (filteredTodos.length === 0) {
     const isFiltered =
       filters.search ||
       filters.status !== "all" ||
       filters.priority !== "all" ||
-      filters.category !== "all";
+      Boolean(filters.category);
 
     return (
       <>
@@ -55,10 +83,36 @@ export default function TodoList() {
   }
 
   return (
-    <div className="space-y-2.5 animate-fade-in">
+    <div className="space-y-2.5 animate-fade-in" aria-busy={isFetching}>
       {filteredTodos.map((todo) => (
         <TodoCard key={todo.id} todo={todo} />
       ))}
+      {pagination.totalPages > 1 && (
+        <nav
+          aria-label="Todo pages"
+          className="flex items-center justify-between gap-3 pt-3"
+        >
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-slate-400">
+            Page {page} of {pagination.totalPages}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={page >= pagination.totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </Button>
+        </nav>
+      )}
     </div>
   );
 }

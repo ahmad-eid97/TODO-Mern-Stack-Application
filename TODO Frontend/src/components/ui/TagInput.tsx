@@ -7,6 +7,7 @@ interface TagInputProps {
   onChange: (tags: string[]) => void;
   placeholder?: string;
   maxTags?: number;
+  maxTagLength?: number;
   label?: string;
   error?: string;
 }
@@ -16,6 +17,7 @@ export default function TagInput({
   onChange,
   placeholder = "Add tag, press Enter",
   maxTags = 8,
+  maxTagLength = 40,
   label,
   error,
 }: TagInputProps) {
@@ -23,7 +25,13 @@ export default function TagInput({
 
   const addTag = (value: string) => {
     const tag = value.trim().toLowerCase();
-    if (!tag || tags.includes(tag) || tags.length >= maxTags) return;
+    if (
+      !tag ||
+      tag.length > maxTagLength ||
+      tags.includes(tag) ||
+      tags.length >= maxTags
+    )
+      return;
     onChange([...tags, tag]);
     setInput("");
   };
@@ -47,7 +55,6 @@ export default function TagInput({
       <div
         className={clsx(
           "flex flex-wrap gap-2 bg-slate-800 border rounded-xl px-3 py-2 min-h-[44px]",
-          "focus-within:ring-2 focus-within:ring-violet-500/60 focus-within:border-violet-500",
           error ? "border-red-500/60" : "border-slate-700",
         )}
       >
@@ -70,11 +77,12 @@ export default function TagInput({
           <input
             type="text"
             value={input}
+            maxLength={maxTagLength}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={() => addTag(input)}
             placeholder={tags.length === 0 ? placeholder : ""}
-            className="flex-1 min-w-[120px] bg-transparent text-sm text-slate-100 placeholder:text-slate-500 outline-none"
+            className="flex-1 min-w-[120px] border-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 outline-none!"
           />
         )}
       </div>

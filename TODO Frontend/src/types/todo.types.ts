@@ -6,7 +6,6 @@ export interface SubTask {
   id: string;
   title: string;
   completed: boolean;
-  createdAt: string;
 }
 
 export interface Todo {
@@ -41,9 +40,9 @@ export interface UpdateTodoPayload {
   priority?: TodoPriority;
   status?: TodoStatus;
   category?: string;
-  dueDate?: string;
+  dueDate?: string | null;
   tags?: string[];
-  subtasks?: SubTask[];
+  subtasks?: (Omit<SubTask, "id"> & { id?: string })[];
 }
 
 export interface TodoFilters {
@@ -51,8 +50,25 @@ export interface TodoFilters {
   status: FilterStatus;
   priority: TodoPriority | "all";
   category: string;
-  sortBy: "createdAt" | "dueDate" | "priority" | "title";
   sortDir: "asc" | "desc";
+}
+
+export interface TodoPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface TodosQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: TodoStatus;
+  priority?: TodoPriority;
+  category?: string;
+  overdue?: boolean;
+  sortOrder?: "asc" | "desc";
 }
 
 export interface TodoStats {

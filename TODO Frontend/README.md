@@ -15,11 +15,19 @@ For deployment, set the public HTTPS API URL before building, set the backend's
 `CORS_ORIGIN` to the frontend origin, and keep frontend/API on the same site for
 the backend's `SameSite=Lax` cookie.
 
-Todo operations still use their existing mock API. A public user cache remains
-in local storage to give those mocks the authenticated user's ID; it is never
-used to decide whether a session is authenticated. Old mock accounts do not
-exist in the backend and must be registered there. Profile viewing uses the real
-user; editing is unavailable because the backend has no profile-update endpoint.
+Todo operations use the real cookie-authenticated backend: `/todos`,
+`/todos/stats`, `/todos/categories`, and `/todos/completed`. The Todo page sends
+search and filters to the server and displays ten results per page. Sorting uses
+the backend's `createdAt` order with `sortOrder=asc|desc`.
+
+Status changes and subtask checkboxes use `PATCH /todos/:todoId`. Existing
+subtasks retain their MongoDB IDs; new IDs are assigned by the backend. Clearing
+the deadline sends `dueDate: null`. Dashboard and profile summaries load
+unfiltered pages, while global counts come from the stats endpoint.
+
+Old mock Todos are not migrated or sent to the backend. Old mock accounts must
+be registered in the backend. Profile viewing uses the real user; editing is
+unavailable because the backend has no profile-update endpoint.
 
 ## Vite template notes
 

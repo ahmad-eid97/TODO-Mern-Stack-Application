@@ -9,13 +9,11 @@ import TodoForm from "../todos/TodoForm";
 
 export default function Navbar() {
   const { user } = useAuth();
-  const { setFilters, stats } = useTodos();
-  const [search, setSearch] = useState("");
+  const { setFilters, filters, stats } = useTodos();
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (value: string) => {
-    setSearch(value);
     setFilters({ search: value });
     if (value.trim()) navigate("/todos");
   };
@@ -32,18 +30,19 @@ export default function Navbar() {
           </span>
         </div>
 
-        <div className="relative hidden md:flex items-center w-72">
-          <Search className="absolute left-3 w-4 h-4 text-slate-500 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search todos..."
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3">
+          <div className="relative hidden md:flex items-center w-72">
+            <Search className="absolute left-3 w-4 h-4 text-slate-500 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search todos..."
+              value={filters.search}
+              maxLength={120}
+              aria-label="Search todos"
+              onChange={(e) => handleSearch(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
+            />
+          </div>
           <Button
             variant="primary"
             size="sm"

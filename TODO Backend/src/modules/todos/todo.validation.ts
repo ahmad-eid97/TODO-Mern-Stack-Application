@@ -23,6 +23,14 @@ const subtaskSchema = z.object({
   completed: z.boolean(),
 });
 
+const updateSubtaskSchema = subtaskSchema.extend({
+  _id: z
+    .string()
+    .regex(/^[a-f\d]{24}$/i, "Invalid subtask ObjectId")
+    .transform((value) => value.toLowerCase())
+    .optional(),
+});
+
 export const todoSchema = z.object({
   title: z
     .string()
@@ -43,22 +51,45 @@ export const todoSchema = z.object({
 
 export const updateTodoSchema = todoSchema
   .partial()
+  .extend({
+    dueDate: z.coerce.date().nullable().optional(),
+    subtasks: z
+      .array(updateSubtaskSchema)
+      .max(50, "At most 50 subtasks are allowed")
+      .refine(
+        (subtasks) => {
+          const ids = subtasks
+            .map((subtask) => subtask._id)
+            .filter((id) => id !== undefined);
+
+          return new Set(ids).size === ids.length;
+        },
+        { message: "Subtask IDs must be unique" },
+      )
+      .optional(),
+  })
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field is required",
   });
+
+const SortOrder = ["asc", "desc"] as const;
 
 export const todosQuerySchema = z
   .object({
     page: z.coerce.number().int().min(1).max(1000).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(10),
-    title: z
+    search: z
       .string()
       .trim()
-      .max(120, "Max 120 characters for title search")
+      .max(120, "Max 120 characters for search term")
       .transform((value) => (value === "" ? undefined : value))
       .optional(),
     priority: z.enum(Priority).optional(),
     status: z.enum(Status).optional(),
+    overdue: z
+      .enum(["true", "false"])
+      .transform((value) => value === "true")
+      .optional(),
     category: z
       .string()
       .trim()
@@ -73,6 +104,7 @@ export const todosQuerySchema = z
     }, tagsSchema),
     dueDateFrom: z.coerce.date().optional(),
     dueDateTo: z.coerce.date().optional(),
+    sortOrder: z.enum(SortOrder).default("desc"),
   })
   .strict()
   .refine((data) => (data.page - 1) * data.limit <= 10000, {

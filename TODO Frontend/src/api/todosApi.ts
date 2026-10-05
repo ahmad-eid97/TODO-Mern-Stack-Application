@@ -1,200 +1,174 @@
-// import axiosInstance from './axiosInstance'; // ← Uncomment this when backend is ready
+import axiosInstance from "./axiosInstance";
 import type {
   Todo,
-  SubTask,
+  TodoStatus,
+  TodoPriority,
   CreateTodoPayload,
   UpdateTodoPayload,
   TodoStats,
+  TodoPagination,
+  TodosQuery,
 } from "../types/todo.types";
-import type { ApiResponse } from "../types/api.types";
 
-const delay = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
+const STATUS_TO_API = {
+  pending: "Pending",
+  in_progress: "In Progress",
+  completed: "Completed",
+} as const;
 
-const TODOS_STORE = "mock_todos";
+const PRIORITY_TO_API = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  urgent: "Urgent",
+} as const;
 
-const readTodos = (): Todo[] =>
-  JSON.parse(localStorage.getItem(TODOS_STORE) || "[]");
+type ApiStatus = (typeof STATUS_TO_API)[TodoStatus];
+type ApiPriority = (typeof PRIORITY_TO_API)[TodoPriority];
 
-const writeTodos = (todos: Todo[]) =>
-  localStorage.setItem(TODOS_STORE, JSON.stringify(todos));
+const STATUS_FROM_API: Record<ApiStatus, TodoStatus> = {
+  Pending: "pending",
+  "In Progress": "in_progress",
+  Completed: "completed",
+};
 
-const currentUserId = (): string =>
-  (JSON.parse(localStorage.getItem("auth_user") || "{}") as { id?: string })
-    .id ?? "";
+const PRIORITY_FROM_API: Record<ApiPriority, TodoPriority> = {
+  Low: "low",
+  Medium: "medium",
+  High: "high",
+  Urgent: "urgent",
+};
+
+interface ApiTodo {
+  _id: string;
+  owner: string;
+  title: string;
+  description?: string;
+  status: ApiStatus;
+  priority: ApiPriority;
+  category?: string;
+  dueDate?: string | null;
+  completedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  tags?: string[];
+  subtasks?: { _id: string; title: string; completed: boolean }[];
+}
+
+const toTodo = (todo: ApiTodo): Todo => ({
+  id: todo._id,
+  userId: todo.owner,
+  title: todo.title,
+  description: todo.description,
+  status: STATUS_FROM_API[todo.status],
+  priority: PRIORITY_FROM_API[todo.priority],
+  category: todo.category,
+  dueDate: todo.dueDate ?? undefined,
+  completedAt: todo.completedAt ?? undefined,
+  createdAt: todo.createdAt,
+  updatedAt: todo.updatedAt,
+  tags: todo.tags ?? [],
+  subtasks: (todo.subtasks ?? []).map((subtask) => ({
+    id: subtask._id,
+    title: subtask.title,
+    completed: subtask.completed,
+  })),
+});
 
 export const todosApi = {
-  getAll: async (): Promise<ApiResponse<Todo[]>> => {
-    // return (await axiosInstance.get('/todos')).data;
-
-    await delay(500);
-    const uid = currentUserId();
-    const todos = readTodos().filter((t) => t.userId === uid);
-    return { data: todos, message: "Todos fetched", success: true };
-  },
-
-  getById: async (id: string): Promise<ApiResponse<Todo>> => {
-    // return (await axiosInstance.get(`/todos/${id}`)).data;
-
-    await delay(300);
-    const uid = currentUserId();
-    const todo = readTodos().find((t) => t.id === id && t.userId === uid);
-    if (!todo)
-      throw { response: { status: 404, data: { message: "Todo not found" } } };
-    return { data: todo, message: "Todo fetched", success: true };
-  },
-
-  create: async (payload: CreateTodoPayload): Promise<ApiResponse<Todo>> => {
-    // return (await axiosInstance.post('/todos', payload)).data;
-
-    await delay(400);
-    const now = new Date().toISOString();
-    const subtasks: SubTask[] = (payload.subtasks ?? []).map((s) => ({
-      id: crypto.randomUUID(),
-      title: s.title,
-      completed: false,
-      createdAt: now,
-    }));
-    const newTodo: Todo = {
-      id: crypto.randomUUID(),
-      userId: currentUserId(),
-      title: payload.title,
-      description: payload.description,
-      status: "pending",
-      priority: payload.priority,
-      category: payload.category,
-      dueDate: payload.dueDate,
-      tags: payload.tags ?? [],
-      subtasks,
-      createdAt: now,
-      updatedAt: now,
+  getAll: async (
+    query: TodosQuery = {},
+    signal?: AbortSignal,
+  ): Promise<{ todos: Todo[]; pagination: TodoPagination }> => {
+    const response = await axiosInstance.get<{
+      data: { todos: ApiTodo[]; pagination: TodoPagination };
+    }>("/todos", {
+      signal,
+      params: {
+        ...query,
+        status: query.status ? STATUS_TO_API[query.status] : undefined,
+        priority: query.priority ? PRIORITY_TO_API[query.priority] : undefined,
+        overdue:
+          query.overdue === undefined ? undefined : String(query.overdue),
+      },
+    });
+    return {
+      todos: response.data.data.todos.map(toTodo),
+      pagination: response.data.data.pagination,
     };
-    writeTodos([...readTodos(), newTodo]);
-    return { data: newTodo, message: "Todo created", success: true };
   },
 
-  update: async (
-    id: string,
-    payload: UpdateTodoPayload,
-  ): Promise<ApiResponse<Todo>> => {
-    // return (await axiosInstance.put(`/todos/${id}`, payload)).data;
-
-    await delay(400);
-    const uid = currentUserId();
-    const todos = readTodos();
-    const idx = todos.findIndex((t) => t.id === id && t.userId === uid);
-    if (idx === -1)
-      throw { response: { status: 404, data: { message: "Todo not found" } } };
-    const now = new Date().toISOString();
-    const updated: Todo = {
-      ...todos[idx],
+  create: async (payload: CreateTodoPayload): Promise<Todo> => {
+    const response = await axiosInstance.post<{ data: ApiTodo }>("/todos", {
       ...payload,
-      updatedAt: now,
-      completedAt:
-        payload.status === "completed"
-          ? now
-          : payload.status != null
-            ? undefined
-            : todos[idx].completedAt,
-    };
-    todos[idx] = updated;
-    writeTodos(todos);
-    return { data: updated, message: "Todo updated", success: true };
+      priority: PRIORITY_TO_API[payload.priority],
+      status: STATUS_TO_API.pending,
+      category: payload.category ?? "",
+      subtasks: (payload.subtasks ?? []).map((subtask) => ({
+        title: subtask.title,
+        completed: false,
+      })),
+    });
+    return toTodo(response.data.data);
   },
 
-  delete: async (id: string): Promise<ApiResponse<null>> => {
-    // return (await axiosInstance.delete(`/todos/${id}`)).data;
-
-    await delay(400);
-    const uid = currentUserId();
-    const todos = readTodos();
-    const next = todos.filter((t) => !(t.id === id && t.userId === uid));
-    if (next.length === todos.length)
-      throw { response: { status: 404, data: { message: "Todo not found" } } };
-    writeTodos(next);
-    return { data: null, message: "Todo deleted", success: true };
-  },
-
-  toggle: async (id: string): Promise<ApiResponse<Todo>> => {
-    // return (await axiosInstance.patch(`/todos/${id}/toggle`)).data;
-
-    await delay(300);
-    const uid = currentUserId();
-    const todos = readTodos();
-    const idx = todos.findIndex((t) => t.id === id && t.userId === uid);
-    if (idx === -1)
-      throw { response: { status: 404, data: { message: "Todo not found" } } };
-    const now = new Date().toISOString();
-    const nextStatus =
-      todos[idx].status === "completed" ? "pending" : "completed";
-    const updated: Todo = {
-      ...todos[idx],
-      status: nextStatus,
-      completedAt: nextStatus === "completed" ? now : undefined,
-      updatedAt: now,
-    };
-    todos[idx] = updated;
-    writeTodos(todos);
-    return { data: updated, message: "Todo toggled", success: true };
-  },
-
-  toggleSubtask: async (
-    todoId: string,
-    subtaskId: string,
-  ): Promise<ApiResponse<Todo>> => {
-    // return (await axiosInstance.patch(`/todos/${todoId}/subtasks/${subtaskId}/toggle`)).data;
-
-    await delay(250);
-    const uid = currentUserId();
-    const todos = readTodos();
-    const idx = todos.findIndex((t) => t.id === todoId && t.userId === uid);
-    if (idx === -1)
-      throw { response: { status: 404, data: { message: "Todo not found" } } };
-    const updated: Todo = {
-      ...todos[idx],
-      subtasks: todos[idx].subtasks.map((s) =>
-        s.id === subtaskId ? { ...s, completed: !s.completed } : s,
-      ),
-      updatedAt: new Date().toISOString(),
-    };
-    todos[idx] = updated;
-    writeTodos(todos);
-    return { data: updated, message: "Subtask toggled", success: true };
-  },
-
-  deleteCompleted: async (): Promise<ApiResponse<null>> => {
-    // return (await axiosInstance.delete('/todos/completed')).data;
-
-    await delay(400);
-    const uid = currentUserId();
-    writeTodos(
-      readTodos().filter(
-        (t) => !(t.userId === uid && t.status === "completed"),
-      ),
+  update: async (id: string, payload: UpdateTodoPayload): Promise<Todo> => {
+    const response = await axiosInstance.patch<{ data: ApiTodo }>(
+      `/todos/${id}`,
+      {
+        ...payload,
+        priority: payload.priority
+          ? PRIORITY_TO_API[payload.priority]
+          : undefined,
+        status: payload.status ? STATUS_TO_API[payload.status] : undefined,
+        subtasks: payload.subtasks?.map((subtask) => ({
+          ...(subtask.id && { _id: subtask.id }),
+          title: subtask.title,
+          completed: subtask.completed,
+        })),
+      },
     );
-    return { data: null, message: "Completed todos cleared", success: true };
+    return toTodo(response.data.data);
   },
 
-  getStats: async (): Promise<ApiResponse<TodoStats>> => {
-    // return (await axiosInstance.get('/todos/stats')).data;
+  delete: async (id: string): Promise<void> => {
+    await axiosInstance.delete(`/todos/${id}`);
+  },
 
-    await delay(300);
-    const uid = currentUserId();
-    const todos = readTodos().filter((t) => t.userId === uid);
-    const now = new Date();
-    const completed = todos.filter((t) => t.status === "completed").length;
-    const overdue = todos.filter(
-      (t) => t.dueDate && new Date(t.dueDate) < now && t.status !== "completed",
-    ).length;
-    const stats: TodoStats = {
-      total: todos.length,
+  deleteCompleted: async (): Promise<number> => {
+    const response = await axiosInstance.delete<{
+      data: { deletedCount: number };
+    }>("/todos/completed");
+    return response.data.data.deletedCount;
+  },
+
+  getStats: async (signal?: AbortSignal): Promise<TodoStats> => {
+    const response = await axiosInstance.get<{
+      data: {
+        all: number;
+        completed: number;
+        pending: number;
+        overdue: number;
+      };
+    }>("/todos/stats", { signal });
+    const { all, completed, pending, overdue } = response.data.data;
+    return {
+      total: all,
       completed,
-      pending: todos.filter((t) => t.status === "pending").length,
-      inProgress: todos.filter((t) => t.status === "in_progress").length,
+      pending,
       overdue,
-      completionRate:
-        todos.length > 0 ? Math.round((completed / todos.length) * 100) : 0,
+      inProgress: all - completed - pending,
+      completionRate: all > 0 ? Math.round((completed / all) * 100) : 0,
     };
-    return { data: stats, message: "Stats fetched", success: true };
+  },
+
+  getCategories: async (signal?: AbortSignal): Promise<string[]> => {
+    const response = await axiosInstance.get<{ data: string[] }>(
+      "/todos/categories",
+      { signal },
+    );
+    return response.data.data
+      .filter((category) => typeof category === "string" && category.trim())
+      .sort((a, b) => a.localeCompare(b));
   },
 };

@@ -31,6 +31,30 @@ export const getTodos = async (
   });
 };
 
+export const getTodosStats = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) => {
+  const stats = await todoServices.calculateTodosStats(req.user!);
+
+  res.status(200).json({
+    data: stats,
+  });
+};
+
+export const getTodosCategories = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) => {
+  const categories = await todoServices.getCategories(req.user!);
+
+  res.status(200).json({
+    data: categories,
+  });
+};
+
 export const editTodo = async (
   req: Request,
   res: Response,
@@ -55,4 +79,18 @@ export const deleteTodo = async (
   await todoServices.handleDeleteTodo(req.user!, req.params as TodoParamSchema);
 
   res.status(204).send();
+};
+
+export const deleteCompletedTodos = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) => {
+  const deletedCount = await todoServices.handleDeleteCompletedTodos(req.user!);
+
+  res.status(200).json({
+    data: {
+      deletedCount,
+    },
+  });
 };

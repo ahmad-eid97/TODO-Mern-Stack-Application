@@ -21,13 +21,6 @@ const PRIORITY_OPTIONS = [
   { value: "low", label: "🟦 Low" },
 ];
 
-const SORT_OPTIONS = [
-  { value: "createdAt", label: "Date created" },
-  { value: "dueDate", label: "Due date" },
-  { value: "priority", label: "Priority" },
-  { value: "title", label: "Title (A–Z)" },
-];
-
 export default function TodoFilters() {
   const {
     filters,
@@ -35,7 +28,8 @@ export default function TodoFilters() {
     setStatus,
     resetFilters,
     filteredTodos,
-    todos,
+    stats,
+    pagination,
     categories,
   } = useTodos();
 
@@ -46,7 +40,7 @@ export default function TodoFilters() {
     filters.category !== DEFAULT_FILTERS.category;
 
   const categoryOptions = [
-    { value: "all", label: "All categories" },
+    { value: DEFAULT_FILTERS.category, label: "All categories" },
     ...categories.map((c) => ({ value: c, label: c })),
   ];
 
@@ -59,15 +53,12 @@ export default function TodoFilters() {
         {STATUS_TABS.map((tab) => {
           const count =
             tab.value === "all"
-              ? todos.length
+              ? stats?.total
               : tab.value === "overdue"
-                ? todos.filter(
-                    (t) =>
-                      t.dueDate &&
-                      new Date(t.dueDate) < new Date() &&
-                      t.status !== "completed",
-                  ).length
-                : todos.filter((t) => t.status === tab.value).length;
+                ? stats?.overdue
+                : tab.value === "in_progress"
+                  ? stats?.inProgress
+                  : stats?.[tab.value];
 
           return (
             <button
@@ -93,7 +84,7 @@ export default function TodoFilters() {
                     : "bg-slate-700 text-slate-500",
                 )}
               >
-                {count}
+                {count ?? "–"}
               </span>
             </button>
           );
@@ -103,6 +94,7 @@ export default function TodoFilters() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Select
+            aria-label="Filter by priority"
             containerClassName="min-w-[150px]"
             options={PRIORITY_OPTIONS}
             value={filters.priority}
@@ -112,6 +104,7 @@ export default function TodoFilters() {
           />
           {categories.length > 0 && (
             <Select
+              aria-label="Filter by category"
               containerClassName="min-w-[150px]"
               options={categoryOptions}
               value={filters.category}
@@ -121,18 +114,18 @@ export default function TodoFilters() {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <Select
-            containerClassName="w-40"
-            options={SORT_OPTIONS}
-            value={filters.sortBy}
-            onChange={(e) =>
-              setFilters({ sortBy: e.target.value as typeof filters.sortBy })
-            }
-          />
+          <span className="text-xs text-slate-400">
+            {filters.sortDir === "desc" ? "Newest first" : "Oldest first"}
+          </span>
           <button
             onClick={toggleSort}
             className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
             title={`Sort ${filters.sortDir === "desc" ? "ascending" : "descending"}`}
+            aria-label={
+              filters.sortDir === "desc"
+                ? "Show oldest first"
+                : "Show newest first"
+            }
           >
             {filters.sortDir === "desc" ? (
               <SortDesc className="w-4 h-4" />
@@ -160,8 +153,9 @@ export default function TodoFilters() {
           <span className="text-slate-300 font-medium">
             {filteredTodos.length}
           </span>{" "}
-          of <span className="text-slate-300 font-medium">{todos.length}</span>{" "}
-          todos
+          of{" "}
+          <span className="text-slate-300 font-medium">{pagination.total}</span>{" "}
+          matching todos
         </p>
       )}
     </div>

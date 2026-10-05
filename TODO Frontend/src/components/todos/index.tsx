@@ -6,9 +6,17 @@ import TodoList from "./TodoList";
 import TodoForm from "./TodoForm";
 import Button from "../ui/Button";
 import ConfirmDialog from "../ui/ConfirmDialog";
+import toast from "react-hot-toast";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 export default function Todos() {
-  const { stats, filteredTodos, deleteCompleted } = useTodos();
+  const {
+    stats,
+    filteredTodos,
+    deleteCompleted,
+    metadataError,
+    refreshMetadata,
+  } = useTodos();
   const [showForm, setShowForm] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [clearLoading, setClearLoading] = useState(false);
@@ -17,9 +25,11 @@ export default function Todos() {
     setClearLoading(true);
     try {
       await deleteCompleted();
+      setShowClearConfirm(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setClearLoading(false);
-      setShowClearConfirm(false);
     }
   };
 
@@ -58,6 +68,24 @@ export default function Todos() {
           </Button>
         </div>
       </div>
+
+      {metadataError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 space-y-3"
+        >
+          <p className="text-sm text-red-300">
+            Could not refresh counts and categories: {metadataError}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => void refreshMetadata()}
+          >
+            Try again
+          </Button>
+        </div>
+      )}
 
       <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4">
         <TodoFilters />

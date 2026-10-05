@@ -4,8 +4,11 @@ import asyncHandler from "../../middlewares/asyncHandler.js";
 import {
   addNewTodo,
   getTodos,
+  getTodosStats,
+  getTodosCategories,
   editTodo,
   deleteTodo,
+  deleteCompletedTodos,
 } from "./todo.controller.js";
 //= Middlewares
 import authenticate from "../../middlewares/auth/authenticate.js";
@@ -34,12 +37,22 @@ router.get(
   asyncHandler(getTodos),
 );
 
+router.get("/todos/stats", authenticate, asyncHandler(getTodosStats));
+
+router.get("/todos/categories", authenticate, asyncHandler(getTodosCategories));
+
 router.patch(
   "/todos/:todoId",
   authenticate,
   validate(todoParamSchema, "params"),
   validate(updateTodoSchema),
   asyncHandler(editTodo),
+);
+
+router.delete(
+  "/todos/completed",
+  authenticate,
+  asyncHandler(deleteCompletedTodos),
 );
 
 router.delete(
