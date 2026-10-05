@@ -1,7 +1,8 @@
 import axios from "axios";
 
-const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9999";
+
+export const AUTH_SESSION_EXPIRED_EVENT = "auth:session-expired";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -13,10 +14,11 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("auth_user");
-      window.location.href = "/login";
+    const isAuthSubmission = ["/auth/login", "/auth/register"].includes(
+      error.config?.url,
+    );
+    if (error.response?.status === 401 && !isAuthSubmission) {
+      window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));
     }
     return Promise.reject(error);
   },

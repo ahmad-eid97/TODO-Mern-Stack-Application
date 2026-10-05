@@ -1,14 +1,8 @@
 import { format } from "date-fns";
-import { Mail, Calendar, Edit2 } from "lucide-react";
+import { Mail, Calendar } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import Avatar from "../ui/Avatar";
-import Button from "../ui/Button";
-
-interface ProfileCardProps {
-  onEdit: () => void;
-}
-
-export default function ProfileCard({ onEdit }: ProfileCardProps) {
+export default function ProfileCard() {
   const { user } = useAuth();
 
   return (
@@ -33,14 +27,6 @@ export default function ProfileCard({ onEdit }: ProfileCardProps) {
             </div>
           )}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          leftIcon={<Edit2 className="w-3.5 h-3.5" />}
-          onClick={onEdit}
-        >
-          Edit
-        </Button>
       </div>
     </div>
   );

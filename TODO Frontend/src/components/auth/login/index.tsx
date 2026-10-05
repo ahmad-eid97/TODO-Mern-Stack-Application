@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,8 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const submissionPending = useRef(false);
+  const [isRequestPending, setIsRequestPending] = useState(false);
 
   const {
     register,
@@ -28,12 +30,18 @@ export default function Login() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (values: FormValues) => {
+    if (submissionPending.current) return;
+    submissionPending.current = true;
+    setIsRequestPending(true);
     setError("");
     try {
       await login(values);
       navigate("/dashboard");
     } catch (err) {
       setError(getErrorMessage(err));
+    } finally {
+      submissionPending.current = false;
+      setIsRequestPending(false);
     }
   };
 
@@ -62,12 +70,12 @@ export default function Login() {
             </div>
           )}
 
-          <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl px-4 py-3 text-xs text-violet-300 mb-5">
-            <strong>Demo:</strong> Register an account to start (data stored
-            locally).
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={(event) => {
+              void handleSubmit(onSubmit)(event);
+            }}
+            className="space-y-4"
+          >
             <Input
               label="Email"
               type="email"
@@ -88,7 +96,7 @@ export default function Login() {
               type="submit"
               fullWidth
               size="lg"
-              isLoading={isSubmitting}
+              isLoading={isSubmitting || isRequestPending}
               className="mt-2"
             >
               Sign in

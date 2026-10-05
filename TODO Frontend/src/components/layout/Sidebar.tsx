@@ -10,6 +10,8 @@ import {
   Tag,
 } from "lucide-react";
 import clsx from "clsx";
+import toast from "react-hot-toast";
+import { getErrorMessage } from "../../utils/errorUtils";
 import { useAuth } from "../auth/AuthContext";
 import { useTodos } from "../todos/TodoContext";
 import Avatar from "../ui/Avatar";
@@ -22,13 +24,22 @@ const NAV = [
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user, logout } = useAuth();
   const { stats } = useTodos();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/login");
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -123,6 +134,7 @@ export default function Sidebar() {
         {collapsed ? (
           <button
             onClick={handleLogout}
+            disabled={isLoggingOut}
             title="Logout"
             className="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
           >
@@ -139,6 +151,7 @@ export default function Sidebar() {
             </div>
             <button
               onClick={handleLogout}
+              disabled={isLoggingOut}
               title="Logout"
               className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
             >

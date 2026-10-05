@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +27,8 @@ export default function Register() {
   const { register: authRegister } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const submissionPending = useRef(false);
+  const [isRequestPending, setIsRequestPending] = useState(false);
 
   const {
     register,
@@ -35,12 +37,18 @@ export default function Register() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (values: FormValues) => {
+    if (submissionPending.current) return;
+    submissionPending.current = true;
+    setIsRequestPending(true);
     setError("");
     try {
       await authRegister(values);
       navigate("/dashboard");
     } catch (err) {
       setError(getErrorMessage(err));
+    } finally {
+      submissionPending.current = false;
+      setIsRequestPending(false);
     }
   };
 
@@ -69,7 +77,12 @@ export default function Register() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={(event) => {
+              void handleSubmit(onSubmit)(event);
+            }}
+            className="space-y-4"
+          >
             <Input
               label="Full Name"
               type="text"
@@ -107,7 +120,7 @@ export default function Register() {
               type="submit"
               fullWidth
               size="lg"
-              isLoading={isSubmitting}
+              isLoading={isSubmitting || isRequestPending}
               className="mt-2"
             >
               Create Account

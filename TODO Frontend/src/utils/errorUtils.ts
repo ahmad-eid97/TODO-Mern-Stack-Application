@@ -1,7 +1,20 @@
 export const getErrorMessage = (error: unknown): string => {
   if (error && typeof error === "object" && "response" in error) {
-    const e = error as { response: { data?: { message?: string } } };
-    return e.response?.data?.message ?? "An error occurred";
+    const e = error as {
+      message?: string;
+      response?: {
+        data?: {
+          message?: string;
+          code?: string;
+          details?: { message: string }[];
+        };
+      };
+    };
+    const data = e.response?.data;
+    if (data?.code === "VALIDATION_ERROR") {
+      return data.details?.[0]?.message ?? data.message ?? "Invalid request";
+    }
+    return data?.message ?? e.message ?? "An error occurred";
   }
   if (error instanceof Error) return error.message;
   return "An unexpected error occurred";
