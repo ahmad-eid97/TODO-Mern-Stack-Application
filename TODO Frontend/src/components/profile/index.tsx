@@ -1,4 +1,5 @@
 import ProfileCard from "./ProfileCard";
+import ProfileSettings from "./ProfileSettings";
 import ProfileStats from "./ProfileStats";
 import CategoryBreakdown from "./CategoryBreakdown";
 import TodoSummaryNotice from "../todos/TodoSummaryNotice";
@@ -11,7 +12,7 @@ export default function Profile() {
       <div>
         <h1 className="text-2xl font-bold text-white">Profile</h1>
         <p className="text-sm text-slate-400 mt-0.5">
-          View your account details
+          Manage your account details and password
         </p>
       </div>
 
@@ -19,6 +20,7 @@ export default function Profile() {
       <ProfileStats />
       <TodoSummaryNotice />
       {!isLoading && !error && <CategoryBreakdown />}
+      <ProfileSettings />
     </div>
   );
 }

@@ -20,6 +20,7 @@ export const register = async (
 
   const userAccessToken = generateAccessToken({
     userId: userData._id.toString(),
+    tokenVersion: userData.tokenVersion,
   });
 
   res.cookie(
@@ -44,6 +45,7 @@ export const login = async (
 
   const userAccessToken = generateAccessToken({
     userId: userData._id.toString(),
+    tokenVersion: userData.tokenVersion,
   });
 
   res.cookie(

@@ -17,7 +17,10 @@ axiosInstance.interceptors.response.use(
     const isAuthSubmission = ["/auth/login", "/auth/register"].includes(
       error.config?.url,
     );
-    if (error.response?.status === 401 && !isAuthSubmission) {
+    const isWrongOldPassword =
+      error.config?.url === "/profile/password" &&
+      error.response?.data?.code === "WRONG_OLD_PASSWORD";
+    if (error.response?.status === 401 && !isAuthSubmission && !isWrongOldPassword) {
       window.dispatchEvent(new Event(AUTH_SESSION_EXPIRED_EVENT));
     }
     return Promise.reject(error);

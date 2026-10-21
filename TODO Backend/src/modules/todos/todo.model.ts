@@ -63,6 +63,11 @@ const TodoSchema = new Schema<Todo>(
   { timestamps: true },
 );
 
+TodoSchema.index(
+  { owner: 1, createdAt: -1 },
+  { name: "todos_owner_createdAt" }
+)
+
 const TodoModel = model<Todo>("Todo", TodoSchema);
 
 export default TodoModel;

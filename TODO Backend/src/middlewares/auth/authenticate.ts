@@ -24,8 +24,11 @@ const authenticate = async (
   }
 
   let userId: string;
+  let tokenVersion: number;
   try {
-    userId = verifyAccessToken(token).userId;
+    const payload = verifyAccessToken(token);
+    userId = payload.userId;
+    tokenVersion = payload.tokenVersion ?? 0;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       res.clearCookie(ACCESS_TOKEN_COOKIE, accessTokenCookieOptions);
@@ -57,6 +60,11 @@ const authenticate = async (
     if (!user) {
       res.clearCookie(ACCESS_TOKEN_COOKIE, accessTokenCookieOptions);
       return next(new AppError("User not found", 401, "AUTH_USER_NOT_FOUND"));
+    }
+
+    if ((user.tokenVersion ?? 0) !== tokenVersion) {
+      res.clearCookie(ACCESS_TOKEN_COOKIE, accessTokenCookieOptions);
+      return next(new AppError("Your session has expired. Please log in again", 401, "AUTH_SESSION_REVOKED"));
     }
 
     req.user = user;

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
+import { dashboardApi, type DashboardData } from "../../api/dashboardApi";
 import { todosApi } from "../../api/todosApi";
 import type {
   Todo,
@@ -40,6 +41,7 @@ const EMPTY_PAGINATION: TodoPagination = {
 };
 
 interface TodoState {
+  dashboard: DashboardData | null;
   todos: Todo[];
   listKey: string;
   listScopeKey: string;
@@ -58,6 +60,7 @@ interface TodoState {
 }
 
 type TodoAction =
+  | { type: "DASHBOARD"; data: DashboardData }
   | { type: "FETCHING"; background: boolean }
   | {
       type: "LIST";
@@ -89,6 +92,7 @@ type TodoAction =
   | { type: "CLEAR" };
 
 const initialState: TodoState = {
+  dashboard: null,
   todos: [],
   listKey: "",
   listScopeKey: "",
@@ -108,6 +112,8 @@ const initialState: TodoState = {
 
 function reducer(state: TodoState, action: TodoAction): TodoState {
   switch (action.type) {
+    case "DASHBOARD":
+      return { ...state, dashboard: action.data, stats: action.data.stats };
     case "FETCHING":
       return {
         ...state,
@@ -218,6 +224,7 @@ export function TodoProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useAuth();
   const { pathname } = useLocation();
   const isTodosPage = pathname === "/todos";
+  const isDashboardPage = pathname === "/dashboard" || pathname === "/";
   const [state, dispatch] = useReducer(reducer, initialState);
   const listRequest = useRef<AbortController | null>(null);
   const metadataRequest = useRef<AbortController | null>(null);
@@ -230,11 +237,13 @@ export function TodoProvider({ children }: { children: ReactNode }) {
   const listScopeKey = JSON.stringify([
     userId,
     isTodosPage,
+    isDashboardPage,
     ...(isTodosPage ? [filters] : []),
   ]);
   const listKey = JSON.stringify([
     userId,
     isTodosPage,
+    isDashboardPage,
     ...(isTodosPage ? [filters, page] : []),
   ]);
 
@@ -281,6 +290,13 @@ export function TodoProvider({ children }: { children: ReactNode }) {
         : { page: 1, limit: 100, sortOrder: "desc" };
 
       try {
+        if (isDashboardPage) {
+          const data = await dashboardApi.get(controller.signal);
+          if (controller.signal.aborted) return;
+          dispatch({ type: "DASHBOARD", data });
+          dispatch({ type: "LIST", todos: [], pagination: EMPTY_PAGINATION, key: listKey, scopeKey: listScopeKey });
+          return;
+        }
         const result = await todosApi.getAll(query, controller.signal);
         if (controller.signal.aborted) return;
 
@@ -328,7 +344,7 @@ export function TodoProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [isAuthenticated, isTodosPage, filters, page, listKey, listScopeKey],
+    [isAuthenticated, isTodosPage, isDashboardPage, filters, page, listKey, listScopeKey],
   );
 
   const refreshMetadata = useCallback(async () => {
@@ -337,11 +353,11 @@ export function TodoProvider({ children }: { children: ReactNode }) {
     const controller = new AbortController();
     metadataRequest.current = controller;
     const [stats, categories] = await Promise.allSettled([
-      todosApi.getStats(controller.signal),
+      isDashboardPage ? Promise.resolve(null) : todosApi.getStats(controller.signal),
       todosApi.getCategories(controller.signal),
     ]);
     if (controller.signal.aborted) return;
-    if (stats.status === "fulfilled") {
+    if (stats.status === "fulfilled" && stats.value) {
       dispatch({ type: "STATS", stats: stats.value });
     }
     if (categories.status === "fulfilled") {
@@ -355,7 +371,7 @@ export function TodoProvider({ children }: { children: ReactNode }) {
       message:
         failed?.status === "rejected" ? getErrorMessage(failed.reason) : null,
     });
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isDashboardPage]);
 
   useEffect(() => {
     const timer = setTimeout(
@@ -507,6 +523,7 @@ export function TodoProvider({ children }: { children: ReactNode }) {
     <TodoContext.Provider
       value={{
         ...state,
+        dashboard: state.listKey === listKey ? state.dashboard : null,
         isLoading:
           state.isLoading ||
           (isAuthenticated && state.listKey !== listKey && !keepPreviousData),

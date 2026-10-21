@@ -3,6 +3,7 @@ import env from "../config/env.js";
 
 interface AccessTokenPayload {
   userId: string;
+  tokenVersion?: number;
 }
 
 interface VerifiedAccessTokenPayload extends AccessTokenPayload {
@@ -10,7 +11,7 @@ interface VerifiedAccessTokenPayload extends AccessTokenPayload {
 }
 
 export const generateAccessToken = (payload: AccessTokenPayload): string => {
-  return jwt.sign(payload, env.JWT_SECRET, {
+  return jwt.sign({ ...payload, tokenVersion: payload.tokenVersion ?? 0 }, env.JWT_SECRET, {
     algorithm: "HS256",
     expiresIn: env.JWT_EXPIRES_IN,
   });
@@ -33,10 +34,13 @@ export const verifyAccessToken = (
     !/^[a-fA-F0-9]{24}$/.test(payload.userId) ||
     typeof payload.exp !== "number" ||
     !Number.isSafeInteger(payload.exp) ||
-    payload.exp <= 0
+    payload.exp <= 0 ||
+    (payload.tokenVersion !== undefined &&
+      (!Number.isSafeInteger(payload.tokenVersion) || payload.tokenVersion < 0))
   ) {
     throw new jwt.JsonWebTokenError("Invalid access token claims");
   }
 
-  return { userId: payload.userId, exp: payload.exp };
+  // Older tokens without a version remain valid only until the first change.
+  return { userId: payload.userId, exp: payload.exp, tokenVersion: payload.tokenVersion ?? 0 };
 };

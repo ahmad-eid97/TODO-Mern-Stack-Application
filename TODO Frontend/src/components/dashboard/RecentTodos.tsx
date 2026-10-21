@@ -1,65 +1,28 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Clock, ArrowRight, Plus, CheckSquare } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
 import { useTodos } from "../todos/TodoContext";
-import TodoCard from "../todos/TodoCard";
-import TodoForm from "../todos/TodoForm";
-import Button from "../ui/Button";
-import EmptyState from "../ui/EmptyState";
+import Badge from "../ui/Badge";
 
 export default function RecentTodos() {
-  const { todos } = useTodos();
-  const [showForm, setShowForm] = useState(false);
-
-  const recentTodos = [...todos]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
-    .slice(0, 5);
-
+  const { dashboard } = useTodos();
+  const todos = dashboard?.recentTodos ?? [];
   return (
-    <>
-      <div className="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-white flex items-center gap-2">
-            <Clock className="w-4 h-4 text-slate-400" />
-            Recent Todos
-          </h2>
-          <Link
-            to="/todos"
-            className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors"
-          >
-            View all <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {recentTodos.length === 0 ? (
-          <EmptyState
-            icon={<CheckSquare className="w-6 h-6" />}
-            title="No todos yet"
-            description="Create your first todo to get started."
-            action={
-              <Button
-                variant="primary"
-                size="sm"
-                leftIcon={<Plus className="w-3.5 h-3.5" />}
-                onClick={() => setShowForm(true)}
-              >
-                Create Todo
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-2">
-            {recentTodos.map((todo) => (
-              <TodoCard key={todo.id} todo={todo} />
-            ))}
-          </div>
-        )}
+    <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-base font-semibold text-white"><Clock className="h-4 w-4 text-slate-400" />Recent Todos</h2>
+        <Link to="/todos" className="flex items-center gap-1 text-xs text-violet-400">View all <ArrowRight className="h-3.5 w-3.5" /></Link>
       </div>
-
-      <TodoForm isOpen={showForm} onClose={() => setShowForm(false)} />
-    </>
+      {todos.length === 0 ? <p className="py-10 text-center text-sm text-slate-400">No todos yet. Use New Todo to create your first task.</p> : (
+        <div className="space-y-2">
+          {todos.map(todo => <Link key={todo.id} to="/todos" className="flex items-center justify-between gap-3 rounded-xl border border-slate-700/50 bg-slate-800/60 p-3 hover:bg-slate-700/60">
+            <div className="min-w-0">
+              <p className="truncate text-sm text-white">{todo.title}</p>
+              <p className="mt-1 text-xs text-slate-400">{todo.status === "in_progress" ? "In progress" : todo.status === "completed" ? "Completed" : "Pending"}</p>
+            </div>
+            <Badge variant={todo.priority}>{todo.priority}</Badge>
+          </Link>)}
+        </div>
+      )}
+    </div>
   );
 }

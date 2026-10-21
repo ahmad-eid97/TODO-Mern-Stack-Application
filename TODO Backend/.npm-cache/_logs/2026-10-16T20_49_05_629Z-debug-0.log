@@ -1,0 +1,236 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.6.0
+2 info using node@v24.8.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\civil\OneDrive\Desktop\TODO-Mern-Stack-Application\TODO Backend\.npmrc
+5 silly config load:file:C:\Users\civil\.npmrc
+6 silly config load:file:C:\Users\civil\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm audit
+8 verbose argv "audit" "--omit" "dev" "--json" "--cache" ".npm-cache"
+9 verbose logfile logs-max:10 dir:C:\Users\civil\OneDrive\Desktop\TODO-Mern-Stack-Application\TODO Backend\.npm-cache\_logs\2026-10-16T20_49_05_629Z-
+10 verbose logfile C:\Users\civil\OneDrive\Desktop\TODO-Mern-Stack-Application\TODO Backend\.npm-cache\_logs\2026-10-16T20_49_05_629Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 silly audit bulk request {
+13 silly audit   '@emnapi/runtime': [ '1.11.3' ],
+13 silly audit   '@img/colour': [ '1.1.0' ],
+13 silly audit   '@img/sharp-darwin-arm64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-darwin-x64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-freebsd-wasm32': [ '0.35.5' ],
+13 silly audit   '@img/sharp-libvips-darwin-arm64': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-darwin-x64': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-linux-arm': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-linux-arm64': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-linux-ppc64': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-linux-riscv64': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-linux-s390x': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-linux-x64': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-linuxmusl-arm64': [ '1.3.4' ],
+13 silly audit   '@img/sharp-libvips-linuxmusl-x64': [ '1.3.4' ],
+13 silly audit   '@img/sharp-linux-arm': [ '0.35.5' ],
+13 silly audit   '@img/sharp-linux-arm64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-linux-ppc64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-linux-riscv64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-linux-s390x': [ '0.35.5' ],
+13 silly audit   '@img/sharp-linux-x64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-linuxmusl-arm64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-linuxmusl-x64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-wasm32': [ '0.35.5' ],
+13 silly audit   '@img/sharp-webcontainers-wasm32': [ '0.35.5' ],
+13 silly audit   '@img/sharp-win32-arm64': [ '0.35.5' ],
+13 silly audit   '@img/sharp-win32-ia32': [ '0.35.5' ],
+13 silly audit   '@img/sharp-win32-x64': [ '0.35.5' ],
+13 silly audit   '@mongodb-js/saslprep': [ '1.4.13' ],
+13 silly audit   '@standard-schema/spec': [ '1.1.0' ],
+13 silly audit   '@types/webidl-conversions': [ '7.0.3' ],
+13 silly audit   '@types/whatwg-url': [ '13.0.0' ],
+13 silly audit   accepts: [ '2.0.0' ],
+13 silly audit   'append-field': [ '1.0.0' ],
+13 silly audit   'basic-auth': [ '2.0.1' ],
+13 silly audit   bcrypt: [ '6.0.0' ],
+13 silly audit   'body-parser': [ '2.3.0' ],
+13 silly audit   'content-type': [ '2.0.0', '1.0.5' ],
+13 silly audit   bson: [ '7.3.1' ],
+13 silly audit   'buffer-equal-constant-time': [ '1.0.1' ],
+13 silly audit   busboy: [ '1.6.0' ],
+13 silly audit   bytes: [ '3.1.2' ],
+13 silly audit   'call-bind-apply-helpers': [ '1.0.2' ],
+13 silly audit   'call-bound': [ '1.0.4' ],
+13 silly audit   'content-disposition': [ '1.1.0' ],
+13 silly audit   cookie: [ '0.7.2' ],
+13 silly audit   'cookie-parser': [ '1.4.7' ],
+13 silly audit   'cookie-signature': [ '1.0.6', '1.2.2' ],
+13 silly audit   cors: [ '2.8.6' ],
+13 silly audit   debug: [ '4.4.3', '2.6.9' ],
+13 silly audit   depd: [ '2.0.0' ],
+13 silly audit   'detect-libc': [ '2.1.2' ],
+13 silly audit   dotenv: [ '17.4.2' ],
+13 silly audit   'dunder-proto': [ '1.0.1' ],
+13 silly audit   'ecdsa-sig-formatter': [ '1.0.11' ],
+13 silly audit   'ee-first': [ '1.1.1' ],
+13 silly audit   encodeurl: [ '2.0.0' ],
+13 silly audit   'es-define-property': [ '1.0.1' ],
+13 silly audit   'es-errors': [ '1.3.0' ],
+13 silly audit   'es-object-atoms': [ '1.1.2' ],
+13 silly audit   'escape-html': [ '1.0.3' ],
+13 silly audit   etag: [ '1.8.1' ],
+13 silly audit   express: [ '5.2.1' ],
+13 silly audit   'express-rate-limit': [ '8.7.0' ],
+13 silly audit   finalhandler: [ '2.1.1' ],
+13 silly audit   forwarded: [ '0.2.0' ],
+13 silly audit   fresh: [ '2.0.0' ],
+13 silly audit   'function-bind': [ '1.1.2' ],
+13 silly audit   'get-intrinsic': [ '1.3.0' ],
+13 silly audit   'get-proto': [ '1.0.1' ],
+13 silly audit   gopd: [ '1.2.0' ],
+13 silly audit   'has-symbols': [ '1.1.0' ],
+13 silly audit   hasown: [ '2.0.4' ],
+13 silly audit   helmet: [ '8.3.0' ],
+13 silly audit   'http-errors': [ '2.0.1' ],
+13 silly audit   'iconv-lite': [ '0.7.3' ],
+13 silly audit   inherits: [ '2.0.4' ],
+13 silly audit   'ip-address': [ '10.7.3' ],
+13 silly audit   'ipaddr.js': [ '1.9.1' ],
+13 silly audit   'is-promise': [ '4.0.0' ],
+13 silly audit   jsonwebtoken: [ '9.0.3' ],
+13 silly audit   jwa: [ '2.0.1' ],
+13 silly audit   jws: [ '4.0.1' ],
+13 silly audit   kareem: [ '3.3.0' ],
+13 silly audit   'lodash.includes': [ '4.3.0' ],
+13 silly audit   'lodash.isboolean': [ '3.0.3' ],
+13 silly audit   'lodash.isinteger': [ '4.0.4' ],
+13 silly audit   'lodash.isnumber': [ '3.0.3' ],
+13 silly audit   'lodash.isplainobject': [ '4.0.6' ],
+13 silly audit   'lodash.isstring': [ '4.0.1' ],
+13 silly audit   'lodash.once': [ '4.1.1' ],
+13 silly audit   'math-intrinsics': [ '1.1.0' ],
+13 silly audit   'media-typer': [ '1.1.1', '0.3.0' ],
+13 silly audit   'memory-pager': [ '1.5.0' ],
+13 silly audit   'merge-descriptors': [ '2.0.0' ],
+13 silly audit   'mime-db': [ '1.54.0', '1.52.0' ],
+13 silly audit   'mime-types': [ '3.0.2', '2.1.35' ],
+13 silly audit   mongodb: [ '7.5.0' ],
+13 silly audit   'mongodb-connection-string-url': [ '7.0.2' ],
+13 silly audit   mongoose: [ '9.8.0' ],
+13 silly audit   morgan: [ '1.11.0' ],
+13 silly audit   ms: [ '2.0.0', '2.1.3' ],
+13 silly audit   mpath: [ '0.9.0' ],
+13 silly audit   mquery: [ '6.0.0' ],
+13 silly audit   multer: [ '2.4.0' ],
+13 silly audit   'type-is': [ '1.6.18', '2.1.0' ],
+13 silly audit   negotiator: [ '1.0.0' ],
+13 silly audit   'node-addon-api': [ '8.9.0' ],
+13 silly audit   'node-gyp-build': [ '4.8.4' ],
+13 silly audit   'object-assign': [ '4.1.1' ],
+13 silly audit   'object-inspect': [ '1.13.4' ],
+13 silly audit   'on-finished': [ '2.4.1' ],
+13 silly audit   'on-headers': [ '1.1.0' ],
+13 silly audit   once: [ '1.4.0' ],
+13 silly audit   parseurl: [ '1.3.3' ],
+13 silly audit   'path-to-regexp': [ '8.4.2' ],
+13 silly audit   'proxy-addr': [ '2.0.7' ],
+13 silly audit   punycode: [ '2.3.1' ],
+13 silly audit   qs: [ '6.15.3' ],
+13 silly audit   'range-parser': [ '1.3.0' ],
+13 silly audit   'raw-body': [ '3.0.2' ],
+13 silly audit   router: [ '2.2.0' ],
+13 silly audit   'safe-buffer': [ '5.1.2' ],
+13 silly audit   'safer-buffer': [ '2.1.2' ],
+13 silly audit   semver: [ '7.8.5' ],
+13 silly audit   send: [ '1.2.1' ],
+13 silly audit   'serve-static': [ '2.2.1' ],
+13 silly audit   setprototypeof: [ '1.2.0' ],
+13 silly audit   sharp: [ '0.35.5' ],
+13 silly audit   'side-channel': [ '1.1.1' ],
+13 silly audit   'side-channel-list': [ '1.0.1' ],
+13 silly audit   'side-channel-map': [ '1.0.1' ],
+13 silly audit   'side-channel-weakmap': [ '1.0.2' ],
+13 silly audit   sift: [ '17.1.3' ],
+13 silly audit   'sparse-bitfield': [ '3.0.3' ],
+13 silly audit   statuses: [ '2.0.2' ],
+13 silly audit   streamsearch: [ '1.1.0' ],
+13 silly audit   toidentifier: [ '1.0.1' ],
+13 silly audit   tr46: [ '5.1.1' ],
+13 silly audit   tslib: [ '2.8.1' ],
+13 silly audit   unpipe: [ '1.0.0' ],
+13 silly audit   vary: [ '1.1.2' ],
+13 silly audit   'webidl-conversions': [ '7.0.0' ],
+13 silly audit   'whatwg-url': [ '14.2.0' ],
+13 silly audit   wrappy: [ '1.0.2' ],
+13 silly audit   zod: [ '4.6.5' ]
+13 silly audit }
+14 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 485ms
+15 silly audit report {
+15 silly audit report   morgan: [
+15 silly audit report     {
+15 silly audit report       id: 1193794,
+15 silly audit report       url: 'https://github.com/advisories/GHSA-jxfw-x594-9x9m',
+15 silly audit report       title: 'morgan vulnerable to Log Forging via unescaped Unicode line separators',
+15 silly audit report       severity: 'moderate',
+15 silly audit report       vulnerable_versions: '<1.12.0',
+15 silly audit report       cwe: [Array],
+15 silly audit report       cvss: [Object]
+15 silly audit report     },
+15 silly audit report     {
+15 silly audit report       id: 1239936,
+15 silly audit report       url: 'https://github.com/advisories/GHSA-9f6g-j8ch-79g4',
+15 silly audit report       title: 'morgan vulnerable to Log Injection via unescaped double quote in quoted log fields',
+15 silly audit report       severity: 'moderate',
+15 silly audit report       vulnerable_versions: '<1.12.1',
+15 silly audit report       cwe: [Array],
+15 silly audit report       cvss: [Object]
+15 silly audit report     }
+15 silly audit report   ],
+15 silly audit report   'proxy-addr': [
+15 silly audit report     {
+15 silly audit report       id: 1241210,
+15 silly audit report       url: 'https://github.com/advisories/GHSA-jqcg-44mw-7w3h',
+15 silly audit report       title: 'proxy-addr vulnerable to IP spoofing via IPv4-mapped IPv6 trust subnet',
+15 silly audit report       severity: 'critical',
+15 silly audit report       vulnerable_versions: '>=1.1.0 <2.0.8',
+15 silly audit report       cwe: [Array],
+15 silly audit report       cvss: [Object]
+15 silly audit report     }
+15 silly audit report   ],
+15 silly audit report   qs: [
+15 silly audit report     {
+15 silly audit report       id: 1158506,
+15 silly audit report       url: 'https://github.com/advisories/GHSA-x5fp-wj9c-mxmx',
+15 silly audit report       title: 'qs array-limit bypass via bracket-key comma parsing',
+15 silly audit report       severity: 'moderate',
+15 silly audit report       vulnerable_versions: '>=6.14.2 <=6.15.3',
+15 silly audit report       cwe: [Array],
+15 silly audit report       cvss: [Object]
+15 silly audit report     },
+15 silly audit report     {
+15 silly audit report       id: 1158507,
+15 silly audit report       url: 'https://github.com/advisories/GHSA-4mjr-xmp4-gh2g',
+15 silly audit report       title: 'qs: Denial of Service via Attacker Controlled isBuffer',
+15 silly audit report       severity: 'moderate',
+15 silly audit report       vulnerable_versions: '>=2.2.5 <6.16.0',
+15 silly audit report       cwe: [Array],
+15 silly audit report       cvss: [Object]
+15 silly audit report     }
+15 silly audit report   ]
+15 silly audit report }
+16 silly packumentCache corgi:https://registry.npmjs.org/morgan cache-miss
+17 silly packumentCache corgi:https://registry.npmjs.org/proxy-addr cache-miss
+18 silly packumentCache corgi:https://registry.npmjs.org/qs cache-miss
+19 http cache https://registry.npmjs.org/morgan 21ms (cache hit)
+20 silly packumentCache corgi:https://registry.npmjs.org/morgan set size:24996 disposed:false
+21 http cache https://registry.npmjs.org/proxy-addr 23ms (cache hit)
+22 silly packumentCache corgi:https://registry.npmjs.org/proxy-addr set size:24608 disposed:false
+23 http cache https://registry.npmjs.org/qs 24ms (cache hit)
+24 silly packumentCache corgi:https://registry.npmjs.org/qs set size:150848 disposed:false
+25 silly packumentCache corgi:https://registry.npmjs.org/express cache-miss
+26 http cache https://registry.npmjs.org/express 6ms (cache hit)
+27 silly packumentCache corgi:https://registry.npmjs.org/express set size:342878 disposed:false
+28 silly packumentCache corgi:https://registry.npmjs.org/body-parser cache-miss
+29 http cache https://registry.npmjs.org/body-parser 9ms (cache hit)
+30 silly packumentCache corgi:https://registry.npmjs.org/body-parser set size:82509 disposed:false
+31 verbose cwd C:\Users\civil\OneDrive\Desktop\TODO-Mern-Stack-Application\TODO Backend
+32 verbose os Windows_NT 10.0.26300
+33 verbose node v24.8.0
+34 verbose npm  v11.6.0
+35 verbose exit 1
+36 verbose code 1

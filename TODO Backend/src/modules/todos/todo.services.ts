@@ -13,7 +13,6 @@ import type {
 } from "./todo.validation.js";
 import { Status } from "./todo.types.js";
 
-// Share the deadline rule between the paginated list and the stats count.
 const overdueExpression = (now: Date) => ({
   $and: [
     { $eq: [{ $type: "$dueDate" }, "date"] },
@@ -183,11 +182,11 @@ const calculateTodosStats = async (user: IUser) => {
   return stats
     ? stats
     : {
-        all: 0,
-        completed: 0,
-        pending: 0,
-        overdue: 0,
-      };
+      all: 0,
+      completed: 0,
+      pending: 0,
+      overdue: 0,
+    };
 };
 
 const getCategories = async (user: IUser) => {

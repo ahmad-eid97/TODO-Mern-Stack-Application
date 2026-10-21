@@ -8,7 +8,8 @@ import TodoForm from "../todos/TodoForm";
 
 export default function DashboardHeader() {
   const { user } = useAuth();
-  const { stats } = useTodos();
+  const { dashboard, isLoading, error } = useTodos();
+  const stats = dashboard?.stats;
   const [showForm, setShowForm] = useState(false);
 
   const now = new Date();
@@ -28,7 +29,9 @@ export default function DashboardHeader() {
           </h1>
           <p className="text-slate-400 text-sm mt-1">
             {format(now, "EEEE, MMMM d, yyyy")} &nbsp;·&nbsp;
-            {stats?.pending
+            {isLoading || error || !stats
+              ? "Your task overview"
+              : stats.pending
               ? `You have ${stats.pending} pending todo${stats.pending === 1 ? "" : "s"}`
               : "You're all caught up!"}
           </p>

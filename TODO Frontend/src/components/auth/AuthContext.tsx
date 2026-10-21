@@ -15,6 +15,7 @@ import type {
   User,
   LoginCredentials,
   RegisterCredentials,
+  ProfileUpdate,
 } from "../../types/auth.types";
 import { getErrorMessage } from "../../utils/errorUtils";
 
@@ -67,6 +68,7 @@ interface AuthContextValue extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (changes: ProfileUpdate) => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -146,8 +148,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast.success("Logged out successfully");
   };
 
+  const updateProfile = async (changes: ProfileUpdate) => {
+    const user = await authApi.updateProfile(changes);
+    cacheUser(user);
+    dispatch({ type: "SET_AUTH", payload: user });
+    return user;
+  };
+
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout }}>
+    <AuthContext.Provider value={{ ...state, login, register, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

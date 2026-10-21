@@ -26,8 +26,29 @@ the deadline sends `dueDate: null`. Dashboard and profile summaries load
 unfiltered pages, while global counts come from the stats endpoint.
 
 Old mock Todos are not migrated or sent to the backend. Old mock accounts must
-be registered in the backend. Profile viewing uses the real user; editing is
-unavailable because the backend has no profile-update endpoint.
+be registered in the backend.
+
+The profile page includes separate profile and password forms. These frontend
+features use the following backend contracts:
+
+- `PATCH /profile/me`: sends multipart form data with only changed `name`,
+  `email`, and `avatar` fields. Avatar is a selected image file (JPG, PNG, or
+  WebP, up to 5 MB). Omitting the avatar preserves the current image. The backend
+  compresses and stores the upload, returning its path as `avatar`; the frontend
+  resolves `/uploads/` paths against the API URL. Return
+  `{ "data": { "_id": "...", "name": "...", "email": "...", "avatar": "...",
+  "createdAt": "...", "updatedAt": "..." } }`, matching `/auth/me`.
+- `PATCH /profile/password`: sends `oldPassword`, `password`, and
+  `confirmPassword`. The backend must verify the old password and validate the
+  new password and confirmation. Any successful 2xx response is accepted.
+  New passwords are limited to 72 UTF-8 bytes. A successful change renews this
+  browser's cookie and invalidates older sessions. The endpoint allows ten
+  attempts per account per 15 minutes; a wrong old password is shown in the form
+  without signing the user out.
+
+Both requests include the authentication cookie. Failed requests show an error
+without reporting success or updating the cached profile. Passwords are never
+stored in local storage and the password form clears after a successful change.
 
 ## Vite template notes
 

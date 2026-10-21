@@ -6,9 +6,12 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 //= Utils
 import env from "./config/env.js";
+import { avatarDirectory } from "./utils/saveImage.js";
 //= Routes
 import healthRouter from "./modules/health/health.routes.js";
 import authRouter from "./modules/auth/auth.routes.js";
+import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
+import profileRoutes from "./modules/profile/profile.routes.js";
 import todoRouter from "./modules/todos/todo.routes.js";
 //= Middleware
 import { apiLimiter } from "./middlewares/rateLimit.js";
@@ -41,13 +44,24 @@ app.use(
 );
 app.use(requestProtection);
 app.use(express.json({ limit: "10kb", strict: true, inflate: false }));
-
 app.use("/", apiLimiter);
 
 //= Routes
 app.use("/", healthRouter);
 app.use("/auth", authRouter);
+app.use("/", dashboardRoutes)
+app.use("/", profileRoutes);
 app.use("/", todoRouter);
+
+app.use(
+  "/uploads/avatars",
+  express.static(avatarDirectory, {
+    dotfiles: "deny",
+    setHeaders: (res) => {
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    },
+  }),
+);
 
 //= Error Handling Middleware
 app.use(notFound);

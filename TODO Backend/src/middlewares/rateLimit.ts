@@ -25,6 +25,20 @@ export const loginLimiter = rateLimit({
   },
 });
 
+// Runs after authentication, so attempts are limited per account across IPs.
+export const passwordChangeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  keyGenerator: (req) => req.user!._id.toString(),
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    status: "error",
+    message: "Too many password change attempts. Please try again later.",
+    code: "PASSWORD_CHANGE_RATE_LIMIT_EXCEEDED",
+  },
+});
+
 export const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 5,

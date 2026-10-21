@@ -12,9 +12,9 @@ const BAR_COLOR: Record<TodoPriority, string> = {
 };
 
 export default function PriorityBreakdown() {
-  const { todos } = useTodos();
+  const { dashboard } = useTodos();
 
-  if (todos.length === 0) return null;
+  if (!dashboard || dashboard.stats.total === 0) return null;
 
   return (
     <div className="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-5">
@@ -23,10 +23,7 @@ export default function PriorityBreakdown() {
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {PRIORITIES.map((p) => {
-          const total = todos.filter((t) => t.priority === p).length;
-          const completed = todos.filter(
-            (t) => t.priority === p && t.status === "completed",
-          ).length;
+          const { total = 0, completed = 0 } = dashboard.priorityBreakdown.find(item => item.priority === p) ?? {};
           const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
           return (
